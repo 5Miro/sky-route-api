@@ -1,0 +1,46 @@
+$kind: http-request
+name: Search Flights - International Happy Path
+method: POST
+url: "{{baseUrl}}/api/flights/search"
+order: 1000
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "originAirportCode": "EZE",
+      "destinationAirportCode": "GRU",
+      "departureDate": "2026-06-22",
+      "passengerCount": 2,
+      "cabinClass": "Business"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      const body = pm.response.json();
+
+      pm.test("Response includes at least one flight offer", function () {
+        pm.expect(body).to.be.an('array');
+        pm.expect(body.length).to.be.greaterThan(0);
+      });
+
+      if (Array.isArray(body) && body.length > 0) {
+        pm.environment.set("offerId", body[0].offerId);
+        pm.environment.set("documentRequirementLabel", body[0].documentRequirementLabel);
+      }
+
+      pm.test("The first result is for an international route", function () {
+        pm.expect(body[0].routeType).to.eql("International");
+        pm.expect(body[0].documentRequirementLabel).to.eql("Passport Number");
+      });
+
+      pm.test("Total price is greater than per-passenger price for 2 passengers", function () {
+        pm.expect(body[0].totalPrice).to.be.greaterThan(body[0].perPassengerPrice);
+      });

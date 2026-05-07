@@ -1,0 +1,38 @@
+$kind: http-request
+name: Create Booking - Happy Path
+method: POST
+url: "{{baseUrl}}/api/bookings"
+order: 1000
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "offerId": "{{offerId}}",
+      "passengerDetails": {
+        "fullName": "Taylor Martinez",
+        "emailAddress": "taylor@example.com",
+        "documentNumber": "ab123cd"
+      }
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      const body = pm.response.json();
+
+      pm.test("Booking response contains a SkyRoute booking reference", function () {
+        pm.expect(body.bookingReference).to.match(/^SR-[A-Z0-9]{8}$/);
+      });
+
+      pm.test("Booking uses the stored offerId", function () {
+        pm.expect(body.offerId).to.eql(pm.environment.get("offerId"));
+      });
+
+      pm.environment.set("bookingReference", body.bookingReference);

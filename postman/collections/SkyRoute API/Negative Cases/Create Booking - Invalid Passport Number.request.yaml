@@ -1,0 +1,32 @@
+$kind: http-request
+name: Create Booking - Invalid Passport Number
+method: POST
+url: "{{baseUrl}}/api/bookings"
+order: 1000
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "offerId": "{{offerId}}",
+      "passengerDetails": {
+        "fullName": "Taylor Martinez",
+        "emailAddress": "taylor@example.com",
+        "documentNumber": "12-34"
+      }
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 400", function () {
+        pm.response.to.have.status(400);
+      });
+
+      pm.test("Validation payload mentions the document number", function () {
+        const body = pm.response.json();
+        const serialized = JSON.stringify(body);
+        pm.expect(serialized).to.include("DocumentNumber");
+      });

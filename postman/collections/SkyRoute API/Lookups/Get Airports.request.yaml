@@ -1,0 +1,27 @@
+$kind: http-request
+name: Get Airports
+method: GET
+url: "{{baseUrl}}/api/lookups/airports"
+order: 1000
+headers:
+  Accept: application/json
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Response is an array of airports", function () {
+        const body = pm.response.json();
+        pm.expect(body).to.be.an('array');
+        pm.expect(body.length).to.be.at.least(6);
+      });
+
+      pm.test("Airport list includes EZE and GRU", function () {
+        const body = pm.response.json();
+        const codes = body.map(item => item.code);
+        pm.expect(codes).to.include("EZE");
+        pm.expect(codes).to.include("GRU");
+      });

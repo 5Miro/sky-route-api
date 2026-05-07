@@ -1,0 +1,31 @@
+$kind: http-request
+name: Search Flights - Invalid Passenger Count
+method: POST
+url: "{{baseUrl}}/api/flights/search"
+order: 2000
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "originAirportCode": "EZE",
+      "destinationAirportCode": "GRU",
+      "departureDate": "2026-06-22",
+      "passengerCount": 0,
+      "cabinClass": "Economy"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 400", function () {
+        pm.response.to.have.status(400);
+      });
+
+      pm.test("Validation payload mentions passenger count", function () {
+        const body = pm.response.json();
+        const serialized = JSON.stringify(body);
+        pm.expect(serialized).to.include("PassengerCount");
+      });

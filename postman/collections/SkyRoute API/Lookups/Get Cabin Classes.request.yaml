@@ -1,0 +1,28 @@
+$kind: http-request
+name: Get Cabin Classes
+method: GET
+url: "{{baseUrl}}/api/lookups/cabin-classes"
+order: 2000
+headers:
+  Accept: application/json
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Response is an array of cabin classes", function () {
+        const body = pm.response.json();
+        pm.expect(body).to.be.an('array');
+        pm.expect(body.length).to.be.at.least(3);
+      });
+
+      pm.test("Cabin classes include Economy, Business, and FirstClass", function () {
+        const body = pm.response.json();
+        const codes = body.map(item => item.code);
+        pm.expect(codes).to.include("Economy");
+        pm.expect(codes).to.include("Business");
+        pm.expect(codes).to.include("FirstClass");
+      });

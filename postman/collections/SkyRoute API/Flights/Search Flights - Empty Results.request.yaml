@@ -1,0 +1,31 @@
+$kind: http-request
+name: Search Flights - Empty Results
+method: POST
+url: "{{baseUrl}}/api/flights/search"
+order: 2000
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "originAirportCode": "AEP",
+      "destinationAirportCode": "COR",
+      "departureDate": "2026-06-21",
+      "passengerCount": 1,
+      "cabinClass": "FirstClass"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Response is an empty array", function () {
+        const body = pm.response.json();
+        pm.expect(body).to.be.an('array');
+        pm.expect(body.length).to.eql(0);
+      });

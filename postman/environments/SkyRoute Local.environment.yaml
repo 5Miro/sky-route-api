@@ -1,0 +1,10 @@
+name: SkyRoute Local
+values:
+  - key: baseUrl
+    value: 'http://localhost:5012'
+  - key: offerId
+    value: ''
+  - key: documentRequirementLabel
+    value: ''
+  - key: bookingReference
+    value: ''
